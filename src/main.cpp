@@ -11,13 +11,22 @@
 #include "AudioGeneratorMP3.h"
 #include "AudioOutputI2SNoDAC.h"
 
+
+#include "ESPAsyncWebServer.h"
+#include "ESPAsyncTCP.h"
+
+AsyncWebServer server(80);
+
 // pripojeni na wifi:
 boolean state = false;
 
 const char *SSID = "WLAN-456LB6";
 const char *PASSWORD = "1grfJRD9m5rB6J0";
+int stanice = 0;
 
 const char *URL = "http://icecast3.play.cz/evropa2-128.mp3"; //Nastaveni stanice
+const char *URL2 = "";
+const char *URL3 = "";
 
 
 AudioGeneratorMP3 *mp3;
@@ -56,13 +65,13 @@ void pressInterrupt() {
 void setup()
 {
   Serial.begin(115200);
-  delay(1000);
+  //delay(1000);
   Serial.println("Pripojovani k WiFi");
-  attachInterrupt(digitalPinToInterrupt(1), pressInterrupt, RISING);
+  //attachInterrupt(digitalPinToInterrupt(1), pressInterrupt, RISING);//zapoznámkoval jsem to, házelo mi to errory 
 
-  WiFi.disconnect();
+  /*WiFi.disconnect();
   WiFi.softAPdisconnect(true);
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_STA);*/
 
   WiFi.begin(SSID, PASSWORD);
 
@@ -73,15 +82,66 @@ void setup()
   }
   Serial.println("Pripojeno");
 
+  if(!SPIFFS.begin()){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  } 
+  Serial.println(WiFi.localIP());
+
+
+   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/index.html", String());
+  });
+
+  server.on("/stanice0", HTTP_POST, [](AsyncWebServerRequest *request){
+    stanice = 0;  
+    request->send(200, "text/json", "{\"result\":\"ok\"}");
+  });
+
+  server.on("/stanice1", HTTP_POST, [](AsyncWebServerRequest *request){
+    stanice = 1;  
+    request->send(200, "text/json", "{\"result\":\"ok\"}");
+  });
+
+  server.on("/stanice2", HTTP_POST, [](AsyncWebServerRequest *request){
+    stanice = 2;  
+    request->send(200, "text/json", "{\"result\":\"ok\"}");
+  });
+
+  
+
+ 
+
   audioLogger = &Serial;
-  file = new AudioFileSourceICYStream(URL);
-  file->RegisterMetadataCB(MDCallback, (void*)"ICY");
+  switch(stanice){
+    case 0:
+     file = new AudioFileSourceICYStream(URL);
+     file->RegisterMetadataCB(MDCallback, (void*)"ICY");
+      break;
+    case 1:
+     file = new AudioFileSourceICYStream(URL2);
+     file->RegisterMetadataCB(MDCallback, (void*)"ICY");
+      break;
+    case 2:
+     file = new AudioFileSourceICYStream(URL3);
+     file->RegisterMetadataCB(MDCallback, (void*)"ICY");
+      break;
+
+   } 
+
+
+
   buff = new AudioFileSourceBuffer(file, 2048);
   buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
   out = new AudioOutputI2SNoDAC();
   mp3 = new AudioGeneratorMP3();
   mp3->RegisterStatusCB(StatusCallback, (void*)"mp3");
   mp3->begin(buff, out);
+
+  server.begin();
+
+
+   
 }
 
 
@@ -101,4 +161,9 @@ void loop()
       delay(1000);
     }
   }
+
+ 
+ Serial.println(stanice);
+ delay(2000);
+
 }

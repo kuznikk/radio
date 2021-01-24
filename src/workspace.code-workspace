@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\..\\..\\GitHub\\ESP8266Audio"
+		},
+		{
+			"name": "wifiwebradio",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
