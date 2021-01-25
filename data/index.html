@@ -16,17 +16,9 @@
       <main class="container">
           <h2>Stanice</h2>
           <hr>
-          <div class="row">
-            <div class="col-sm-2">
-                <button type="button" class="btn btn-info" onclick="stanice0()">nazev stanice0</button>                  
-            </div>
-            <div class="col-sm-2">  
-                <button type="button" class="btn btn-info" onclick="stanice1()">nazev stanice1</button>          
-            </div>
-            <div class="col-sm-2">            
-                <button type="button" class="btn btn-info" onclick="stanice2()">nazev stanice2</button>
-            </div>
-          </div>          
+          <input class="form-control form-control-lg" type="text" placeholder="URL" id="URLtext">
+          <br>
+          <button type="button" class="btn btn-info" onclick="stanice()">Spustit</button>
       </main>
       
     <!-- Optional JavaScript -->
@@ -36,24 +28,11 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-      var stanice = 1;
-      function stanice0() {
-        stanice = 0;
-        console.log(stanice);
-        $.post("/stanice0");  
+      function stanice() {
+        var x = document.getElementById("URLtext").value;
+        $.post("/url", { url: x });
+        console.log(x);
       }
-
-      function stanice1() {
-        stanice = 1;
-        console.log(stanice);
-         $.post("/stanice1");
-      }
-
-      function stanice2() {
-        stanice = 2;
-        console.log(stanice);
-        $.post("/stanice2");
-      }
-      </script>
+    </script>
   </body>
 </html>
